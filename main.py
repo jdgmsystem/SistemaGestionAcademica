@@ -1,9 +1,18 @@
-"""Demostración de las cinco fases del Sistema de Gestión Académica.
+"""Demostración integrada de las actividades 1 y 2 del Sistema Académico.
 
 Ejecutar con: python main.py
 """
 
-from modelos import Administrativo, Asignatura, Docente, Estudiante, ProgramaAcademico
+from modelos import Administrativo, Asignatura, Docente, Estudiante, Persona, ProgramaAcademico
+from grupo_academico import GrupoAcademico
+from sistema_academico import SistemaAcademico
+from excepciones import (
+    EstudianteYaMatriculadoError,
+    CupoAgotadoError,
+    EstudianteNoMatriculadoError,
+    AsignaturaNoEncontradaError,
+    ProgramaNoEncontradoError,
+)
 
 
 def intentar_cambio(descripcion, accion):
@@ -13,6 +22,16 @@ def intentar_cambio(descripcion, accion):
         print(f"CORRECTO: {descripcion}")
     except ValueError as error:
         print(f"RECHAZADO: {descripcion} -> {error}")
+
+
+def ejecutar_operacion(descripcion, accion):
+    """Captura excepciones de negocio e impide que detengan el programa."""
+    try:
+        print(f"CORRECTO: {accion()}")
+    except (EstudianteYaMatriculadoError, CupoAgotadoError,
+            EstudianteNoMatriculadoError, AsignaturaNoEncontradaError,
+            ProgramaNoEncontradoError) as error:
+        print(f"EXCEPCIÓN CONTROLADA ({descripcion}): {error}")
 
 
 def main():
@@ -74,7 +93,54 @@ def main():
         print(persona.mostrar_informacion())
         print("Actividad principal:", persona.realizar_actividad_principal())
 
-    print("\nDemostración terminada correctamente.")
+    # AC2 fase 1: Persona es abstracta, sus especializaciones se mantienen.
+    print("\nAC2 - FASE 1: PERSONA ABSTRACTA")
+    try:
+        Persona("999", "Sin rol", "correo@universidad.edu")
+    except TypeError as error:
+        print("CONTROLADO: No se puede crear Persona directamente:", error)
+
+    # AC2 fases 2 y 3: se aprovechan los objetos construidos en la AC1.
+    print("\nAC2 - FASES 2 Y 3: GRUPOS, OBJETOS Y COMPOSICIÓN")
+    sistema = SistemaAcademico()
+    for programa in (sistemas, contaduria):
+        sistema.registrar_programa(programa)
+    for asignatura in (poo, auditoria):
+        sistema.registrar_asignatura(asignatura)
+
+    grupo_poo = GrupoAcademico("POO-A", poo, personas[2], 2,
+                               "Lunes", "08:00", "10:00", "A-201")
+    grupo_auditoria = GrupoAcademico("AUD-B", auditoria, personas[3], 1,
+                                    "Miércoles", "14:00", "16:00", "B-103")
+    sistema.registrar_grupo(grupo_poo)
+    sistema.registrar_grupo(grupo_auditoria)
+    for grupo in (grupo_poo, grupo_auditoria):
+        print("-" * 62)
+        print(grupo.mostrar_informacion_grupo())
+
+    # AC2 fase 4: matrículas y excepciones lanzadas en el dominio.
+    print("\nAC2 - FASE 4: MATRÍCULAS, RETIROS Y EXCEPCIONES")
+    estudiante_adicional = Estudiante(
+        "1003", "Sofía Ramírez", "sofia@universidad.edu",
+        "E003", sistemas, 2, 4.5)
+    aspirante_sin_cupo = Estudiante(
+        "1004", "Daniel Ruiz", "daniel@universidad.edu",
+        "E004", sistemas, 4, 4.1)
+    ejecutar_operacion("Matrícula válida 1", lambda: grupo_poo.matricular_estudiante(personas[0]))
+    ejecutar_operacion("Matrícula válida 2", lambda: grupo_poo.matricular_estudiante(estudiante_adicional))
+    ejecutar_operacion("Duplicado", lambda: grupo_poo.matricular_estudiante(personas[0]))
+    ejecutar_operacion("Capacidad", lambda: grupo_poo.matricular_estudiante(aspirante_sin_cupo))
+    ejecutar_operacion("Matrícula segundo grupo", lambda: grupo_auditoria.matricular_estudiante(personas[1]))
+    print("\nEstudiantes antes del retiro:")
+    print(grupo_poo.mostrar_estudiantes())
+    ejecutar_operacion("Retiro válido", lambda: grupo_poo.retirar_estudiante("E003"))
+    ejecutar_operacion("Retiro inexistente", lambda: grupo_poo.retirar_estudiante("E003"))
+    ejecutar_operacion("Asignatura inexistente", lambda: sistema.buscar_asignatura("NO-EXISTE").nombre)
+    ejecutar_operacion("Programa inexistente", lambda: sistema.buscar_programa("NO-EXISTE").nombre)
+    print("\nEstudiantes matriculados al finalizar:")
+    print(grupo_poo.mostrar_estudiantes())
+    print("\nCONTINUIDAD CONFIRMADA: El sistema sigue funcionando después de las excepciones.")
+    print("Demostración de las actividades 1 y 2 terminada correctamente.")
 
 
 if __name__ == "__main__":

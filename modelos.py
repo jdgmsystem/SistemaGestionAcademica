@@ -1,9 +1,10 @@
-"""Modelos del Sistema de Gestión Académica.
+"""Modelos originales del Sistema de Gestión Académica, ampliados en la AC2.
 
-Actividad colaborativa N.º 1 - Programación Orientada a Objetos.
-Se aplican clases, constructores, encapsulamiento, herencia,
-sobreescritura de métodos y polimorfismo.
+Las clases y funcionalidades de la AC1 se conservan. Persona pasa a ser
+abstracta mediante ABC y abstractmethod, sin afectar a sus tres subclases.
 """
+
+from abc import ABC, abstractmethod
 
 
 def _texto_obligatorio(valor, campo):
@@ -19,7 +20,7 @@ def _entero_positivo(valor, campo):
     return valor
 
 
-class Persona:
+class Persona(ABC):
     """Clase base para las personas vinculadas a la universidad."""
 
     def __init__(self, identificacion, nombre, correo):
@@ -56,8 +57,10 @@ class Persona:
                 f"Nombre: {self.nombre}\n"
                 f"Correo: {self.correo}")
 
+    @abstractmethod
     def realizar_actividad_principal(self):
-        raise NotImplementedError("Cada tipo de persona define su actividad.")
+        """Cada clase especializada debe definir su actividad principal."""
+        pass
 
 
 class ProgramaAcademico:
@@ -171,6 +174,11 @@ class Estudiante(Persona):
         if isinstance(promedio, bool) or not isinstance(promedio, (int, float)) or not 0 <= promedio <= 5:
             raise ValueError("El promedio debe estar entre 0 y 5.")
         self.__promedio = float(promedio)
+
+    @property
+    def codigo_estudiantil(self):
+        """Código público de consulta; no se permite modificarlo directamente."""
+        return self.__codigo_estudiantil
 
     def mostrar_informacion(self):
         return ("[ESTUDIANTE]\n" + super().mostrar_informacion()

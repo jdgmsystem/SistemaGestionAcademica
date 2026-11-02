@@ -12,7 +12,7 @@ class PruebasSistemaAcademico(unittest.TestCase):
     def setUp(self):
         self.programa = ProgramaAcademico("IS", "Ingeniería de Sistemas", "Ingenierías", 10)
         self.asignatura = Asignatura("POO", "Programación POO", 3, self.programa)
-        self.persona = Persona("123", "Laura", "laura@correo.edu")
+        self.persona = Estudiante("123", "Laura", "laura@correo.edu", "E123", self.programa, 2, 4.0)
 
     def test_constructores_y_consultas(self):
         self.assertIn("Ingeniería de Sistemas", self.programa.mostrar_informacion())
